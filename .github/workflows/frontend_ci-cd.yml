@@ -21,9 +21,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18.x'
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: Frontend/package-lock.json
 
       - name: Check Node & NPM
         run: |
@@ -31,13 +31,13 @@ jobs:
           npm -v
 
       - name: Build
-        working-directory: frontend
+        working-directory: Frontend
         run: |
           npm install
           npm run build
 
       - name: Verify build output
-        run: ls -la frontend/build
+        run: ls -la Frontend/build
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -48,7 +48,7 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync frontend/build/ s3://${{ env.S3_BUCKET }}/ --delete
+          aws s3 sync Frontend/build/ s3://${{ env.S3_BUCKET }}/ --delete
 
       - name: Invalidate CloudFront
         if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
