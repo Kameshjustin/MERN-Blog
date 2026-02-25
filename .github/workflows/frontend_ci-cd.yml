@@ -37,7 +37,7 @@ jobs:
           npm run build
 
       - name: Verify build output
-        run: ls -la Frontend/build
+        run: ls -la Frontend/dist
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -48,7 +48,7 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync Frontend/build/ s3://${{ env.S3_BUCKET }}/ --delete
+          aws s3 sync Frontend/dist/ s3://${{ env.S3_BUCKET }}/ --delete
 
       - name: Invalidate CloudFront
         if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
