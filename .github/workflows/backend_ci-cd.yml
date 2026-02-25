@@ -48,7 +48,12 @@ jobs:
 
             # Pull latest image & run new container
             docker pull $IMAGE
-            docker run -d --name mernblog-container -p 5000:5000 $IMAGE
+            docker run -d \
+              --name mernblog-container \
+              -p 5000:5000 \
+              -e MONGO_URI=${{ secrets.MONGO_URL }} \
+              -e JWT_SECRET=${{ secrets.JWT_SECRET_KEY }} \
+              $IMAGE
 
 
 
