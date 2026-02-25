@@ -24,7 +24,7 @@ jobs:
       # Stage: Build & Push Docker Image
       - name: Build and Push Docker Image
         run: |
-          IMAGE=mernblogimg/myapp:latest
+          IMAGE=kameshkiaq/mernblogimg/myapp:latest
           docker build -t $IMAGE ./Backend
           docker push $IMAGE
 
