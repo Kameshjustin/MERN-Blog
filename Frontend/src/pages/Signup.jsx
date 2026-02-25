@@ -1,6 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for redirect
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
+// Accessing the Vite environment variable
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function Signup() {
   const [username, setUsername] = useState("");
@@ -9,42 +12,38 @@ function Signup() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate(); // Initialize navigate for redirection
-
-  // Handle the change for each input field
-  const handleUsernameChange = (e) => setUsername(e.target.value);
-  const handleEmailChange = (e) => setEmail(e.target.value);
-  const handlePasswordChange = (e) => setPassword(e.target.value);
+  
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Log data to ensure it's correct
-    console.log("Form Data:", { username, email, password });
-
     setIsLoading(true);
+    setError("");
+    setSuccess("");
 
     try {
-      const response = await axios.post("http://localhost:3000/api/users/signup", {
+      // Correctly using the API_URL variable
+      const response = await axios.post(`${API_URL}/api/users/signup`, {
         username,
         email,
         password,
       });
 
-      setSuccess(response.data.message || "Signup successful! Please log in.");
-      setError(""); // Clear error message if any
-      setUsername(""); // Clear the fields after successful signup
+      setSuccess(response.data.message || "Signup successful! Redirecting...");
+      
+      // Clear fields
+      setUsername("");
       setEmail("");
       setPassword("");
 
-      // Redirect to the Sign In page after successful signup
+      // Redirect to Sign In after a short delay
       setTimeout(() => {
-        navigate("/signin"); // Redirect to the Sign In page after signup
-      }, 2000); // Delay to show the success message
+        navigate("/signin");
+      }, 2000);
+
     } catch (err) {
       console.error("Signup Error:", err);
       setError(err.response?.data?.message || "Signup failed. Please try again.");
-      setSuccess(""); // Clear success message if any
     } finally {
       setIsLoading(false);
     }
@@ -53,14 +52,10 @@ function Signup() {
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-        {/* Blog Logo */}
-        {/* <div className="text-center mb-6">
-          <img src="path/to/your/logo.png" alt="Blog Logo" className="mx-auto h-12 w-auto" />
-        </div> */}
-
         <h2 className="text-2xl font-bold mb-4 text-center">Signup</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        {success && <p className="text-green-500 mb-4">{success}</p>}
+        
+        {error && <p className="text-red-500 mb-4 text-center bg-red-50 p-2 rounded">{error}</p>}
+        {success && <p className="text-green-500 mb-4 text-center bg-green-50 p-2 rounded">{success}</p>}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -70,13 +65,13 @@ function Signup() {
             <input
               type="text"
               id="username"
-              name="username"
               value={username}
-              onChange={handleUsernameChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700 font-medium mb-2" htmlFor="email">
               Email
@@ -84,13 +79,13 @@ function Signup() {
             <input
               type="email"
               id="email"
-              name="email"
               value={email}
-              onChange={handleEmailChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700 font-medium mb-2" htmlFor="password">
               Password
@@ -98,23 +93,24 @@ function Signup() {
             <input
               type="password"
               id="password"
-              name="password"
               value={password}
-              onChange={handlePasswordChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
+
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+            className={`w-full text-white py-2 rounded-md transition duration-200 ${
+              isLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            }`}
             disabled={isLoading}
           >
             {isLoading ? "Signing up..." : "Signup"}
           </button>
         </form>
 
-        {/* Redirect to Sign In page */}
         <div className="text-center mt-4">
           <p className="text-sm">
             Already have an account?{" "}

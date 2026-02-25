@@ -17,9 +17,7 @@ export const signup = async (req, res, next) => {
   }
 
   if (password.length < 8) {
-    return next(
-      errorHandler(400, "Password must be at least 8 characters long")
-    );
+    return next(errorHandler(400, "Password must be at least 8 characters long"));
   }
 
   try {
@@ -29,7 +27,6 @@ export const signup = async (req, res, next) => {
     }
 
     const hashedPassword = bcryptjs.hashSync(password, 10);
-
     const newUser = new User({
       username,
       email,
@@ -48,44 +45,43 @@ export const signup = async (req, res, next) => {
 export const signin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    console.log(req.body);
-    // Check if all required fields are provided
+
+    // 1. Validate Input (No logging of req.body here!)
     if (!email || !password) {
       return next(errorHandler(400, "Email and password are required"));
     }
 
-    // Validate email format
     if (!validator.isEmail(email)) {
       return next(errorHandler(400, "Invalid email format"));
     }
 
-    // Find the user by email
+    // 2. Find the user
     const user = await User.findOne({ email });
     if (!user) {
       return next(errorHandler(404, "User not found"));
     }
 
-    // Compare the provided password with the hashed password
+    // 3. Compare the provided password with the hashed password in DB
     const isPasswordValid = bcryptjs.compareSync(password, user.password);
     if (!isPasswordValid) {
       return next(errorHandler(400, "Incorrect password"));
     }
 
-    // Generate a JWT token
+    // 4. Generate a JWT token
     const token = jwt.sign(
       { id: user._id, isBlogger: user.isBlogger },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    // Exclude the password from the user details in the response
+    // 5. Securely return user data (Excluding password)
     const { password: _, ...userDetails } = user._doc;
 
-    // Send response with the token in a cookie
     res
       .status(200)
       .cookie("access_token", token, {
         httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
       })
       .json({
         message: "Signin successful",
@@ -96,4 +92,3 @@ export const signin = async (req, res, next) => {
     return next(errorHandler(500, "Internal server error"));
   }
 };
-
